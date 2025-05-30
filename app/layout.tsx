@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 import "./globals.css";
+import { SWRConfig } from "swr";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +30,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
-        <NuqsAdapter>
-          {children}
-        </NuqsAdapter>
+        <SWRConfig>
+
+          <NuqsAdapter>
+            {children}
+          </NuqsAdapter>
+        </SWRConfig>
       </body>
     </html>
   );

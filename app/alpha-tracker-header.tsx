@@ -4,34 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
-import { useState } from "react";
 import { useQueryState } from "nuqs";
-
+import { useAlphaData } from "./hooks/useAlphaData";
 
 export default function AlphaTrackerHeader() {
-  const [address, setAddress] = useQueryState('address')
-
-  const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [address, setAddress] = useQueryState('address');
+  const { trigger, isLoading } = useAlphaData();
 
   const handleSearch = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const response = await fetch("/api/calculate", {
-        method: "POST",
-        body: JSON.stringify({ address }),
-      });
-      const data = await response.json();
-      setBalance(data.result);
-    } catch (error) {
-      setError(true);
-    } finally {
-      setLoading(false);
+    if (address) {
+      await trigger();
     }
-
-  }
+  };
 
   return (
     <Card>
@@ -43,12 +27,22 @@ export default function AlphaTrackerHeader() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex gap-2 flex-col sm:flex-row">
-          <Input type="text" placeholder="Enter your Binance wallet address" value={address || ""} onChange={(e) => setAddress(e.target.value)} />
-          <Button onClick={handleSearch}>
-            <SearchIcon />
+          <Input
+            className="disabled:opacity-50"
+            type="text"
+            disabled={isLoading}
+            placeholder="Enter your Binance wallet address"
+            value={address || ""}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <Button onClick={handleSearch} disabled={isLoading}>
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+            ) : (
+              <SearchIcon className="h-4 w-4" />
+            )}
           </Button>
         </div>
-
       </CardContent>
     </Card>
   );

@@ -45,8 +45,6 @@ const POST = async (req: Request) => {
     const accountInfoUrlResponse = await fetch(accountInfoUrl);
     const accountInfoUrlData = await accountInfoUrlResponse.json();
 
-    console.log("accountInfoUrlData", accountInfoUrlData.result);
-
     const alphaListResponse = await getAlphaList();
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
