@@ -2,6 +2,15 @@ import { useQueryState } from "nuqs";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 
+const validateAddress = (address: string): boolean => {
+    // Check if address starts with 0x and has 42 characters (0x + 40 hex chars)
+    if (!address.startsWith('0x') || address.length !== 42) return false;
+
+    // Check if the rest of the address contains only hexadecimal characters
+    const hexRegex = /^[0-9a-fA-F]+$/;
+    return hexRegex.test(address.slice(2));
+};
+
 const fetcher = (url: string, { arg }: { arg: string }) =>
     fetch(url, {
         method: "POST",
@@ -13,7 +22,7 @@ export function useAlphaData() {
 
     // Use SWR to keep the data in sync
     const { data: swrData, error: swrError, isLoading, isValidating, mutate } = useSWR(
-        address ? ['/api/calculate', address] : null,
+        address && validateAddress(address) ? ['/api/calculate', address] : null,
         ([url, addr]) => fetcher(url, { arg: addr }),
         {
             revalidateOnFocus: false,
@@ -26,6 +35,7 @@ export function useAlphaData() {
         data: swrData,
         error: swrError,
         isLoading: isLoading || isValidating,
-        trigger: () => address ? mutate(address) : null,
+        trigger: () => address && validateAddress(address) ? mutate(address) : null,
+        isValidAddress: address ? validateAddress(address) : false,
     };
 } 

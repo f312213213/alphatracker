@@ -9,10 +9,10 @@ import { useAlphaData } from "./hooks/useAlphaData";
 
 export default function AlphaTrackerHeader() {
   const [address, setAddress] = useQueryState('address');
-  const { trigger, isLoading } = useAlphaData();
+  const { trigger, isLoading, isValidAddress } = useAlphaData();
 
   const handleSearch = async () => {
-    if (address) {
+    if (address && isValidAddress) {
       await trigger();
     }
   };
@@ -27,15 +27,25 @@ export default function AlphaTrackerHeader() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex gap-2 flex-col sm:flex-row">
-          <Input
-            className="disabled:opacity-50"
-            type="text"
-            disabled={isLoading}
-            placeholder="Enter your Binance wallet address"
-            value={address || ""}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-          <Button onClick={handleSearch} disabled={isLoading}>
+          <div className="flex-1">
+            <Input
+              className={`disabled:opacity-50 ${address && !isValidAddress ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+              type="text"
+              disabled={isLoading}
+              placeholder="Enter your Binance wallet address"
+              value={address || ""}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+            {address && !isValidAddress && (
+              <p className="text-sm text-red-500 mt-1">
+                Please enter a valid Ethereum wallet address (0x followed by 40 hexadecimal characters)
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={handleSearch}
+            disabled={isLoading || !isValidAddress}
+          >
             {isLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
             ) : (
