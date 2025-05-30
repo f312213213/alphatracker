@@ -1,5 +1,6 @@
 import AlphaTrackerHeader from "./alpha-tracker-header";
 import AlphaTrackerProgress from "./alpha-tracker-progress";
+import AlphaTrackerTable from "./alpha-tracker-table";
 
 export default function Home() {
   return (
@@ -7,6 +8,7 @@ export default function Home() {
     <div className="mx-auto max-w-xl sm:max-w-3xl px-8 py-16 flex flex-col gap-4">
       <AlphaTrackerHeader />
       <AlphaTrackerProgress />
+      <AlphaTrackerTable />
     </div>
   );
 }
