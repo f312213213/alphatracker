@@ -55,7 +55,7 @@ export default function AlphaTrackerProgress() {
     <Card>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center justify-between flex-col items-start">
-          <div className="text-xl font-bold text-white dark:text-white">Wallet</div>
+          <div className="text-xl font-bold text-black dark:text-white">Wallet</div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-sm font-mono">{truncateMiddle(address)}</span>
             <Button variant="ghost" size="icon" className="h-6 w-6 p-0" onClick={() => navigator.clipboard.writeText(address || "")}><Copy className="h-4 w-4" /></Button>
@@ -73,7 +73,7 @@ export default function AlphaTrackerProgress() {
               {showSkeleton ? (
                 <Skeleton className="h-7 w-24 mt-1" />
               ) : (
-                <div className="text-lg font-semibold text-white dark:text-white mt-1">
+                <div className="text-lg font-semibold text-black dark:text-white mt-1">
                   ${volume.toLocaleString()} <span className="text-xs text-muted-foreground">({data?.volume.toLocaleString()})</span>
                 </div>
               )}
@@ -97,7 +97,7 @@ export default function AlphaTrackerProgress() {
               {showSkeleton ? (
                 <Skeleton className="h-7 w-12 mt-1" />
               ) : (
-                <div className="text-lg font-semibold text-white dark:text-white mt-1">
+                <div className="text-lg font-semibold text-black dark:text-white mt-1">
                   {points}
                 </div>
               )}
@@ -116,7 +116,7 @@ export default function AlphaTrackerProgress() {
         </div>
 
         <div>
-          <div className="text-xl font-bold text-white dark:text-white">Progress</div>
+          <div className="text-xl font-bold text-black dark:text-white">Progress</div>
           <div className="flex justify-between text-sm text-muted-foreground mb-1">
             {showSkeleton ? (
               <>
