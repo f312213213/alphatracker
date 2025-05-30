@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+always use shadcnui
+if needed shadcnui component is not install, hint user to install them, and just use like they are already exist
