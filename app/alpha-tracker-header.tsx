@@ -20,7 +20,7 @@ export default function AlphaTrackerHeader() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-4xl font-bold">Binance Alpha Tracker</CardTitle>
+        <CardTitle className="text-2xl sm:text-4xl font-bold">Binance Alpha Tracker</CardTitle>
         <CardDescription>
           Track your alpha points progress
         </CardDescription>

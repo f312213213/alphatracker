@@ -30,6 +30,10 @@ export default function AlphaTrackerTable() {
   const showSkeleton = isLoading;
   const rowCount = showSkeleton ? 8 : transactions.length;
 
+  if (!address || !data && !isLoading) {
+    return null;
+  }
+
   return (
     <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-x-auto">
       <Table>
