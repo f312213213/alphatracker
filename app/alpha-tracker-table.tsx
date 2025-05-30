@@ -6,7 +6,7 @@ import { Clock } from "lucide-react";
 import { useAlphaData } from "./hooks/useAlphaData";
 import { useQueryState } from "nuqs";
 
-function truncateMiddle(str: string, front = 6, back = 4) {
+function truncateMiddle(str: string, front = 6, back = 6) {
   if (!str) return "";
   if (str.length <= front + back) return str;
   return `${str.slice(0, front)}...${str.slice(-back)}`;
@@ -16,10 +16,10 @@ function timeAgo(timestamp: string | number) {
   const now = Date.now();
   const t = typeof timestamp === "string" ? new Date(timestamp).getTime() : Number(timestamp) * 1000;
   const diff = Math.floor((now - t) / 1000);
-  if (diff < 60) return `${diff} 秒前`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
-  return `${Math.floor(diff / 86400)} 天前`;
+  if (diff < 60) return `${diff} seconds ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+  return `${Math.floor(diff / 86400)} days ago`;
 }
 
 export default function AlphaTrackerTable() {
