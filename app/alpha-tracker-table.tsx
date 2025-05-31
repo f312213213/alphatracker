@@ -69,7 +69,7 @@ export default function AlphaTrackerTable() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                     No transactions found for this address
                   </TableCell>
                 </motion.tr>
