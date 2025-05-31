@@ -99,7 +99,7 @@ export default function AlphaTrackerProgress() {
           <div className="flex flex-wrap gap-6">
             <div className="flex flex-col min-w-[90px]">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                Volume <Badge className="bg-muted text-xs px-1.5 py-0.5">2x with BSC event</Badge>
+                Volume <Badge className="bg-muted text-xs px-1.5 py-0.5"><a href="https://www.binance.com/support/announcement/detail/37f90caac9c24988bbd9ce3595a136a2" target="_blank" rel="noopener noreferrer">2x with BSC event</a></Badge>
               </div>
               {showSkeleton ? (
                 <Skeleton className="h-7 w-24 mt-1" />

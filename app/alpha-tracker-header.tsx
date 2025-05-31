@@ -22,7 +22,7 @@ export default function AlphaTrackerHeader() {
       <CardHeader>
         <CardTitle className="text-2xl sm:text-4xl font-bold">Binance Alpha Tracker</CardTitle>
         <CardDescription>
-          Track your alpha points progress
+          Track your alpha points progress. Only available for Binance keyless wallet swapping token on BSC.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
