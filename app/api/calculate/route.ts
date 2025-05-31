@@ -23,26 +23,34 @@ const getAlphaList = async () => {
 }
 
 const POST = async (req: Request) => {
-    const { address } = await req.json();
+    const { address, blockNumber } = await req.json();
 
+    if (!address) {
+        return NextResponse.json(
+            { error: "Address is required" },
+            { status: 400 }
+        );
+    }
+
+    if (!blockNumber) {
+        return NextResponse.json(
+            { error: "Block number is required" },
+            { status: 400 }
+        );
+    }
 
     const alphaListResponse = await getAlphaList();
-
-    const currentBlock = await fetch("https://api.etherscan.io/v2/api?chainid=56&module=block&action=getblocknobytime&timestamp=" + Math.floor(new Date().setUTCHours(0, 0, 0, 0) / 1000) + "&closest=before&apikey=" + process.env.ETHERSCAN_API_KEY);
-    const currentBlockData = await currentBlock.json();
-    const currentBlockNumber = currentBlockData.result;
 
     const bnbPrice = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT");
     const bnbPriceData = await bnbPrice.json();
     const bnbPriceValue = bnbPriceData.price;
-
 
     const accountInfoUrl = new URL("https://api.etherscan.io/v2/api");
     accountInfoUrl.searchParams.set("chainid", "56");
     accountInfoUrl.searchParams.set("module", "account");
     accountInfoUrl.searchParams.set("action", "tokentx");
     accountInfoUrl.searchParams.set("address", address);
-    accountInfoUrl.searchParams.set("startblock", currentBlockNumber);
+    accountInfoUrl.searchParams.set("startblock", blockNumber);
     accountInfoUrl.searchParams.set("endblock", "99999999");
     accountInfoUrl.searchParams.set("page", "1");
     accountInfoUrl.searchParams.set("offset", "10000");
@@ -51,7 +59,6 @@ const POST = async (req: Request) => {
 
     const accountInfoUrlResponse = await fetch(accountInfoUrl);
     const accountInfoUrlData = await accountInfoUrlResponse.json();
-
 
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
@@ -77,6 +84,5 @@ const POST = async (req: Request) => {
         }, 0),
     });
 };
-
 
 export { POST };

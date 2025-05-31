@@ -5,6 +5,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 
 import "./globals.css";
 import { SWRConfig } from "swr";
+import { ClientCacheManager } from "./components/ClientCacheManager";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-ibm-plex-sans",
@@ -20,7 +21,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "Binance Alpha Tracker",
-  description: "Track your alpha points progress by entering your Binance wallet address",
+  description: "Track your alpha points progress by entering your Binance keyless wallet address",
 };
 
 export default function RootLayout({
@@ -35,7 +36,9 @@ export default function RootLayout({
       >
         <SWRConfig>
           <NuqsAdapter>
-            {children}
+            <ClientCacheManager>
+              {children}
+            </ClientCacheManager>
           </NuqsAdapter>
         </SWRConfig>
         {process.env.NEXT_PUBLIC_GA_ID && (

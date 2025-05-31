@@ -1,6 +1,7 @@
 import { useQueryState } from "nuqs";
 import useSWR from "swr";
 import { useGATracking } from "./useGATracking";
+import { BlockCache } from "../utils/blockCache";
 
 const validateAddress = (address: string): boolean => {
     // Check if address starts with 0x and has 42 characters (0x + 40 hex chars)
@@ -15,14 +16,34 @@ export function useAlphaData() {
     const [address] = useQueryState('address');
     const { trackWalletSearch } = useGATracking();
 
-    const fetcher = (url: string, { arg }: { arg: string }) => {
+    const fetcher = async (url: string, { arg }: { arg: string }) => {
         // Track the wallet search
         trackWalletSearch(arg);
 
-        return fetch(url, {
-            method: "POST",
-            body: JSON.stringify({ address: arg }),
-        }).then((res) => res.json())
+        try {
+            // Get block number from cache or fetch new one
+            const blockNumber = await BlockCache.getBlockNumber();
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    address: arg,
+                    blockNumber: blockNumber
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response.json();
+        } catch (error) {
+            console.error('Error fetching alpha data:', error);
+            throw error;
+        }
     }
 
     // Use SWR to keep the data in sync
@@ -31,10 +52,15 @@ export function useAlphaData() {
         ([url, addr]) => fetcher(url, { arg: addr }),
         {
             revalidateOnFocus: false,
+            errorRetryCount: 3,
+            errorRetryInterval: 2000,
         }
     );
 
-    // Use SWRMutation for manual triggers
+    // Clear expired cache on mount/address change
+    if (typeof window !== 'undefined') {
+        BlockCache.clearExpiredCache();
+    }
 
     return {
         data: swrData,
