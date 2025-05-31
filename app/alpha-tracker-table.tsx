@@ -52,8 +52,9 @@ export default function AlphaTrackerTable() {
               <TableHead className="w-32 flex items-center gap-1">
                 Time
               </TableHead>
-              <TableHead className="w-40">From</TableHead>
-              <TableHead className="w-40">To</TableHead>
+              <TableHead className="w-40">Sent</TableHead>
+              <TableHead className="w-40">Received</TableHead>
+              <TableHead className="w-48 text-right">Received Value</TableHead>
 
               <TableHead className="w-48 text-right">Gas</TableHead>
             </TableRow>
@@ -82,6 +83,7 @@ export default function AlphaTrackerTable() {
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></TableCell>
+                        <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></TableCell>
                       </TableRow>
                     );
                   }
@@ -100,10 +102,13 @@ export default function AlphaTrackerTable() {
                       <TableCell className="font-mono">{truncateMiddle(tx.hash)}</TableCell>
                       <TableCell>{timeAgo(tx.timestamp)}</TableCell>
                       <TableCell className="font-mono">
-                        {tx.from.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.from.address)})</span>
+                        {tx.from.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.from.address)})</p>
                       </TableCell>
                       <TableCell className="font-mono">
-                        {tx.to.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</span>
+                        {tx.to.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</p>
+                      </TableCell>
+                      <TableCell className="font-mono text-right">
+                        {tx.value.toFixed(6)}
                       </TableCell>
                       <TableCell className="font-mono text-right">
                         {tx.gas} <span className="text-xs text-muted-foreground">BNB</span>

@@ -3,19 +3,25 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+interface TableProps extends React.ComponentProps<"table"> {
+  containerClassName?: string
+}
+
+function Table({ className, containerClassName, ...props }: TableProps) {
   return (
-    <div
+    <ScrollArea
+      className={cn("relative w-full", containerClassName)}
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
     >
       <table
         data-slot="table"
         className={cn("w-full caption-bottom text-sm", className)}
         {...props}
       />
-    </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   )
 }
 
