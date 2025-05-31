@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAlphaData } from "./hooks/useAlphaData";
 import { useQueryState } from "nuqs";
 import { motion, AnimatePresence } from "framer-motion";
+import { ExternalLink } from "lucide-react";
 
 function truncateMiddle(str: string, front = 6, back = 6) {
   if (!str) return "";
@@ -98,19 +99,24 @@ export default function AlphaTrackerTable() {
                       transition={{ duration: 0.2, delay: i * 0.05 }}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
-                      <TableCell className="text-center text-muted-foreground font-mono">{transactions.length - i}</TableCell>
-                      <TableCell className="font-mono">{truncateMiddle(tx.hash)}</TableCell>
+                      <TableCell className="text-center text-muted-foreground">{transactions.length - i}</TableCell>
+                      <TableCell className="">
+                        <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                          {truncateMiddle(tx.hash)}
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </a>
+                      </TableCell>
                       <TableCell>{timeAgo(tx.timestamp)}</TableCell>
-                      <TableCell className="font-mono">
+                      <TableCell className="">
                         {tx.from.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.from.address)})</p>
                       </TableCell>
-                      <TableCell className="font-mono">
+                      <TableCell className="">
                         {tx.to.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</p>
                       </TableCell>
-                      <TableCell className="font-mono text-right">
+                      <TableCell className="text-right">
                         {tx.value.toFixed(6)}
                       </TableCell>
-                      <TableCell className="font-mono text-right">
+                      <TableCell className="text-right">
                         {tx.gas} <span className="text-xs text-muted-foreground">BNB</span>
                       </TableCell>
                     </motion.tr>
