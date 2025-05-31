@@ -42,7 +42,7 @@ interface TransformedTransaction {
     };
 }
 
-export function transformTransactions(rawTransactions: RawTransaction[], address: string): TransformedTransaction[] {
+export function transformTransactions(rawTransactions: RawTransaction[], address: string, bnbPrice: number, alphaListMap: Record<string, any>): TransformedTransaction[] {
     const transactionGroups = rawTransactions.reduce((groups, tx) => {
         if (!groups[tx.hash]) {
             groups[tx.hash] = [];
@@ -67,9 +67,22 @@ export function transformTransactions(rawTransactions: RawTransaction[], address
         const outgoingTx = txs.find(tx => tx.from === address);
         const incomingTx = txs.find(tx => tx.to === address);
 
-        const value = new BigNumber(incomingTx?.value || '0')
-            .dividedBy(new BigNumber(10).pow(parseInt(incomingTx?.tokenDecimal || '18')))
-            .toNumber();
+        let value = 0;
+
+        if (incomingTx) {
+            value = new BigNumber(incomingTx.value)
+                .dividedBy(new BigNumber(10).pow(parseInt(incomingTx.tokenDecimal || '18')))
+                .toNumber();
+        } else {
+            // incomingToken is BNB
+            if (outgoingTx) {
+                value = new BigNumber(outgoingTx.value)
+                    .multipliedBy(alphaListMap[outgoingTx.tokenSymbol].price)
+                    .dividedBy(bnbPrice)
+                    .dividedBy(new BigNumber(10).pow(18))
+                    .toNumber();
+            }
+        }
 
         return {
             hash,

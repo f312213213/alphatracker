@@ -25,9 +25,16 @@ const getAlphaList = async () => {
 const POST = async (req: Request) => {
     const { address } = await req.json();
 
+
+    const alphaListResponse = await getAlphaList();
+
     const currentBlock = await fetch("https://api.etherscan.io/v2/api?chainid=56&module=block&action=getblocknobytime&timestamp=" + Math.floor(new Date().setUTCHours(0, 0, 0, 0) / 1000) + "&closest=before&apikey=" + process.env.ETHERSCAN_API_KEY);
     const currentBlockData = await currentBlock.json();
     const currentBlockNumber = currentBlockData.result;
+
+    const bnbPrice = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT");
+    const bnbPriceData = await bnbPrice.json();
+    const bnbPriceValue = bnbPriceData.price;
 
 
     const accountInfoUrl = new URL("https://api.etherscan.io/v2/api");
@@ -45,12 +52,18 @@ const POST = async (req: Request) => {
     const accountInfoUrlResponse = await fetch(accountInfoUrl);
     const accountInfoUrlData = await accountInfoUrlResponse.json();
 
-    const alphaListResponse = await getAlphaList();
+
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
 
-    const transformedTransactions = transformTransactions(accountInfoUrlData.result.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)), address.toLowerCase());
+    const transformedTransactions = transformTransactions(
+        accountInfoUrlData.result.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
+        address.toLowerCase(),
+        bnbPriceValue,
+        alphaListMap
+    );
     return NextResponse.json({
+        bnbPrice: bnbPriceValue,
         transactions: transformedTransactions,
         volume: transformedTransactions.reduce((acc: number, item: any) => {
             if (item.to.symbol !== "BNB") {

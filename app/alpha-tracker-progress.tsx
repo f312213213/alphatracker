@@ -55,8 +55,7 @@ export default function AlphaTrackerProgress() {
   const previousThreshold = points > 1 ? getNextPointsThreshold(points - 1) : 0;
   const progressValue = volume;
   const progressMax = nextThreshold;
-  const profit = 0; // TODO: Calculate profit from transactions
-
+  const gasFee = data?.transactions?.reduce((acc: number, transaction: any) => acc + transaction.gas, 0);
   const showSkeleton = isLoading;
 
   return (
@@ -134,16 +133,16 @@ export default function AlphaTrackerProgress() {
                 </div>
               )}
             </div>
-            {/* <div className="flex flex-col min-w-[80px]">
-              <div className="text-sm text-muted-foreground">Loss</div>
+            <div className="flex flex-col min-w-[80px]">
+              <div className="text-sm text-muted-foreground">Gas Fee</div>
               {showSkeleton ? (
                 <Skeleton className="h-7 w-16 mt-1" />
               ) : (
                 <div className="text-lg font-semibold mt-1 text-red-500">
-                  ${profit.toLocaleString()}
+                  ${(gasFee * data?.bnbPrice).toLocaleString()} <span className="text-xs text-muted-foreground">(usd)</span>
                 </div>
               )}
-            </div> */}
+            </div>
           </div>
         </div>
 

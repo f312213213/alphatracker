@@ -2,7 +2,6 @@
 
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock } from "lucide-react";
 import { useAlphaData } from "./hooks/useAlphaData";
 import { useQueryState } from "nuqs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,7 +41,7 @@ export default function AlphaTrackerTable() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
         className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-x-auto"
       >
         <Table>
@@ -55,6 +54,8 @@ export default function AlphaTrackerTable() {
               </TableHead>
               <TableHead className="w-40">From</TableHead>
               <TableHead className="w-40">To</TableHead>
+
+              <TableHead className="w-48 text-right">Gas</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,6 +81,7 @@ export default function AlphaTrackerTable() {
                         <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></TableCell>
                       </TableRow>
                     );
                   }
@@ -102,6 +104,9 @@ export default function AlphaTrackerTable() {
                       </TableCell>
                       <TableCell className="font-mono">
                         {tx.to.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</span>
+                      </TableCell>
+                      <TableCell className="font-mono text-right">
+                        {tx.gas} <span className="text-xs text-muted-foreground">BNB</span>
                       </TableCell>
                     </motion.tr>
                   );
