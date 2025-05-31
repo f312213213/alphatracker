@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Copy, ExternalLink, Info } from "lucide-react";
+import { Copy, ExternalLink, Info, Check } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAlphaData } from "./hooks/useAlphaData";
@@ -15,6 +15,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 function truncateMiddle(str: string, front = 6, back = 6) {
   if (!str) return "";
@@ -25,7 +27,13 @@ function truncateMiddle(str: string, front = 6, back = 6) {
 export default function AlphaTrackerProgress() {
   const [address] = useQueryState('address');
   const { data, error, isLoading } = useAlphaData();
+  const [copied, setCopied] = useState(false);
 
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(address || "");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!address || !data && !isLoading) {
     return null;
@@ -58,7 +66,31 @@ export default function AlphaTrackerProgress() {
           <div className="text-xl font-bold text-black dark:text-white">Wallet</div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-sm font-mono">{truncateMiddle(address)}</span>
-            <Button variant="ghost" size="icon" className="h-6 w-6 p-0" onClick={() => navigator.clipboard.writeText(address || "")}><Copy className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" className="h-6 w-6 p-0" onClick={handleCopy}>
+              <AnimatePresence mode="wait">
+                {copied ? (
+                  <motion.div
+                    key="check"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Check className="h-4 w-4 text-green-500" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="copy"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Button>
             {/* <Button variant="ghost" size="icon" className="h-6 w-6 p-0"><ExternalLink className="h-4 w-4" /></Button> */}
           </div>
         </div>
