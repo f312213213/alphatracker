@@ -49,34 +49,42 @@ export default function AlphaTrackerTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {Array.from({ length: rowCount }).map((_, i) => {
-            if (showSkeleton) {
+          {transactions.length === 0 && !showSkeleton ? (
+            <TableRow>
+              <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                No transactions found for this address
+              </TableCell>
+            </TableRow>
+          ) : (
+            Array.from({ length: rowCount }).map((_, i) => {
+              if (showSkeleton) {
+                return (
+                  <TableRow key={i}>
+                    <TableCell className="text-center"><Skeleton className="h-4 w-4 mx-auto" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  </TableRow>
+                );
+              }
+              const tx = transactions[i];
+              if (!tx) return null;
               return (
-                <TableRow key={i}>
-                  <TableCell className="text-center"><Skeleton className="h-4 w-4 mx-auto" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableRow key={tx.hash}>
+                  <TableCell className="text-center text-muted-foreground font-mono">{transactions.length - i}</TableCell>
+                  <TableCell className="font-mono">{truncateMiddle(tx.hash)}</TableCell>
+                  <TableCell>{timeAgo(tx.timestamp)}</TableCell>
+                  <TableCell className="font-mono">
+                    {tx.from.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.from.address)})</span>
+                  </TableCell>
+                  <TableCell className="font-mono">
+                    {tx.to.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</span>
+                  </TableCell>
                 </TableRow>
               );
-            }
-            const tx = transactions[i];
-            if (!tx) return null;
-            return (
-              <TableRow key={tx.hash}>
-                <TableCell className="text-center text-muted-foreground font-mono">{transactions.length - i}</TableCell>
-                <TableCell className="font-mono">{truncateMiddle(tx.hash)}</TableCell>
-                <TableCell>{timeAgo(tx.timestamp)}</TableCell>
-                <TableCell className="font-mono">
-                  {tx.from.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.from.address)})</span>
-                </TableCell>
-                <TableCell className="font-mono">
-                  {tx.to.symbol} <span className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</span>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+            })
+          )}
         </TableBody>
       </Table>
     </div>
