@@ -1,6 +1,6 @@
 import { useQueryState } from "nuqs";
 import useSWR from "swr";
-import useSWRMutation from "swr/mutation";
+import { useGATracking } from "./useGATracking";
 
 const validateAddress = (address: string): boolean => {
     // Check if address starts with 0x and has 42 characters (0x + 40 hex chars)
@@ -11,14 +11,19 @@ const validateAddress = (address: string): boolean => {
     return hexRegex.test(address.slice(2));
 };
 
-const fetcher = (url: string, { arg }: { arg: string }) =>
-    fetch(url, {
-        method: "POST",
-        body: JSON.stringify({ address: arg }),
-    }).then((res) => res.json());
-
 export function useAlphaData() {
     const [address] = useQueryState('address');
+    const { trackWalletSearch } = useGATracking();
+
+    const fetcher = (url: string, { arg }: { arg: string }) => {
+        // Track the wallet search
+        trackWalletSearch(arg);
+
+        return fetch(url, {
+            method: "POST",
+            body: JSON.stringify({ address: arg }),
+        }).then((res) => res.json())
+    }
 
     // Use SWR to keep the data in sync
     const { data: swrData, error: swrError, isLoading, isValidating, mutate } = useSWR(
