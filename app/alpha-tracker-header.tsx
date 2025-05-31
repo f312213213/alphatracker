@@ -3,19 +3,56 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { SearchIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { SearchIcon, XIcon, ClockIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useAlphaData } from "./hooks/useAlphaData";
+import { useRecentSearches } from "./hooks/useRecentSearches";
+import { useEffect } from "react";
+import { cn } from "@/lib/utils";
+
+// Helper function to truncate address for display
+function truncateAddress(address: string, front = 6, back = 4) {
+  if (!address) return "";
+  if (address.length <= front + back) return address;
+  return `${address.slice(0, front)}...${address.slice(-back)}`;
+}
 
 export default function AlphaTrackerHeader() {
   const [address, setAddress] = useQueryState('address');
-  const { trigger, isLoading, isValidAddress } = useAlphaData();
+  const { trigger, isLoading, isValidAddress, data } = useAlphaData();
+  const { recentSearches, addRecentSearch, clearRecentSearches, removeRecentSearch } = useRecentSearches();
 
   const handleSearch = async () => {
     if (address && isValidAddress) {
       await trigger();
     }
   };
+
+  const handleBadgeClick = async (searchAddress: string) => {
+    if (searchAddress === address || isLoading) {
+      return
+    }
+    setAddress(searchAddress);
+    // Trigger search automatically when badge is clicked
+    // We need to wait for the address to be set in the URL state
+    setTimeout(async () => {
+      await trigger();
+    }, 100);
+  };
+
+  const handleRemoveRecentSearch = (searchAddress: string, e: React.MouseEvent) => {
+
+    e.stopPropagation(); // Prevent badge click
+    removeRecentSearch(searchAddress);
+  };
+
+  // Add successful searches to recent searches
+  useEffect(() => {
+    if (data && address && isValidAddress) {
+      addRecentSearch(address);
+    }
+  }, [data, address, isValidAddress, addRecentSearch]);
 
   return (
     <Card>
@@ -59,6 +96,46 @@ export default function AlphaTrackerHeader() {
             )}
           </Button>
         </div>
+
+        {/* Recent Searches */}
+        {recentSearches.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <ClockIcon className="h-4 w-4" />
+                Recent Searches
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearRecentSearches}
+                className="text-xs h-auto p-1 text-muted-foreground hover:text-foreground"
+              >
+                Clear All
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {recentSearches.map((searchAddress) => (
+                <Badge
+                  key={searchAddress}
+                  variant="outline"
+                  className={cn("cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-1 pr-1", {
+                    "cursor-not-allowed opacity-50": searchAddress === address || isLoading
+                  })}
+                  onClick={() => handleBadgeClick(searchAddress)}
+                >
+                  <span>{truncateAddress(searchAddress)}</span>
+                  <button
+                    onClick={(e) => handleRemoveRecentSearch(searchAddress, e)}
+                    className="ml-1 cursor-pointer hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5 transition-colors"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
