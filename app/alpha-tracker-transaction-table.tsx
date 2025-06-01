@@ -55,8 +55,8 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
               <TableHead className="w-32">
                 Time
               </TableHead>
-              <TableHead className="w-40">Sent</TableHead>
-              <TableHead className="w-40">Received</TableHead>
+              <TableHead className="w-40 text-right">Sent</TableHead>
+              <TableHead className="w-40 text-right">Received</TableHead>
 
               <TableHead className="w-48 text-right">Gas</TableHead>
             </TableRow>
@@ -82,8 +82,8 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
                         <TableCell className="text-center"><Skeleton className="h-4 w-4 mx-auto" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-24" /></div></TableCell>
+                        <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-24" /></div></TableCell>
                         <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></TableCell>
                       </TableRow>
                     );
@@ -107,10 +107,10 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
                         </a>
                       </TableCell>
                       <TableCell>{timeAgo(tx.timestamp)}</TableCell>
-                      <TableCell className="">
+                      <TableCell className="text-right">
                         {tx.from.value.toFixed(6)} {tx.from.symbol === 'BSC-USD' ? 'USDT' : tx.from.symbol} <p className="text-sm text-muted-foreground">({truncateMiddle(tx.from.address)})</p>
                       </TableCell>
-                      <TableCell className="">
+                      <TableCell className="text-right">
                         {tx.to.value.toFixed(6)} {tx.to.symbol === 'BSC-USD' ? 'USDT' : tx.to.symbol} <p className="text-sm text-muted-foreground">({truncateMiddle(tx.to.address)})</p>
                       </TableCell>
 

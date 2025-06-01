@@ -86,7 +86,7 @@ export default function AlphaTrackerTokenTable({ data, isLoading, tokenList, tok
                       transition={{ duration: 0.2, delay: i * 0.05 }}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
-                      <TableCell className="text-center text-muted-foreground">{tokenList.length - i}</TableCell>
+                      <TableCell className="text-center text-muted-foreground">{i + 1}</TableCell>
                       <TableCell>{token === 'BSC-USD' ? 'USDT' : token} <p className="text-xs text-muted-foreground">({truncateMiddle(tokenMap[token].address)})</p></TableCell>
                       <TableCell className="text-right">{tokenMap[token].outgoing.toFixed(6)}</TableCell>
                       <TableCell className="text-right">{tokenMap[token].incoming.toFixed(6)}</TableCell>
