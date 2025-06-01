@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { transformTransactions } from '@/app/utils/transformTransactions'
+import { etherscanRateLimiter } from '@/app/utils/rateLimiter';
+import { etherscanApiKeyRotator } from '@/app/utils/apiKeyRotator';
 
 const DEX_ROUTER_ADDRESS = '0xb300000b72deaeb607a12d5f54773d1c19c7028d';
 
@@ -58,11 +60,12 @@ const POST = async (req: Request) => {
     accountNormalUrl.searchParams.set("page", "1");
     accountNormalUrl.searchParams.set("offset", "10000");
     accountNormalUrl.searchParams.set("sort", "desc");
-    accountNormalUrl.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
+    accountNormalUrl.searchParams.set("apikey", etherscanApiKeyRotator.getNextKey() || "");
 
-    const accountNormalUrlResponse = await fetch(accountNormalUrl);
-    const accountNormalUrlData = await accountNormalUrlResponse.json();
-
+    const accountNormalUrlData = await etherscanRateLimiter.execute(async () => {
+        const response = await fetch(accountNormalUrl);
+        return response.json();
+    });
 
     const accountInternalUrl = new URL("https://api.etherscan.io/v2/api");
     accountInternalUrl.searchParams.set("chainid", "56");
@@ -74,11 +77,12 @@ const POST = async (req: Request) => {
     accountInternalUrl.searchParams.set("page", "1");
     accountInternalUrl.searchParams.set("offset", "10000");
     accountInternalUrl.searchParams.set("sort", "desc");
-    accountInternalUrl.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
+    accountInternalUrl.searchParams.set("apikey", etherscanApiKeyRotator.getNextKey() || "");
 
-    const accountInternalUrlResponse = await fetch(accountInternalUrl);
-    const accountInternalUrlData = await accountInternalUrlResponse.json();
-
+    const accountInternalUrlData = await etherscanRateLimiter.execute(async () => {
+        const response = await fetch(accountInternalUrl);
+        return response.json();
+    });
 
     const accountBEP20Url = new URL("https://api.etherscan.io/v2/api");
     accountBEP20Url.searchParams.set("chainid", "56");
@@ -90,10 +94,12 @@ const POST = async (req: Request) => {
     accountBEP20Url.searchParams.set("page", "1");
     accountBEP20Url.searchParams.set("offset", "10000");
     accountBEP20Url.searchParams.set("sort", "desc");
-    accountBEP20Url.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
+    accountBEP20Url.searchParams.set("apikey", etherscanApiKeyRotator.getNextKey() || "");
 
-    const accountBEP20UrlResponse = await fetch(accountBEP20Url);
-    const accountBEP20UrlData = await accountBEP20UrlResponse.json();
+    const accountBEP20UrlData = await etherscanRateLimiter.execute(async () => {
+        const response = await fetch(accountBEP20Url);
+        return response.json();
+    });
 
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
