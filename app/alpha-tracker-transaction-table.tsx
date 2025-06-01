@@ -32,7 +32,10 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
 
   const transactions = data?.transactions || [];
   const showSkeleton = isLoading;
-  const rowCount = showSkeleton ? 8 : transactions.length;
+
+  const filteredTransactions = transactions.filter((tx: any) => tx.contributeToVolume);
+
+  const rowCount = showSkeleton ? 8 : filteredTransactions.length;
 
   return (
     <AnimatePresence mode="wait">
@@ -49,19 +52,18 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
             <TableRow>
               <TableHead className="w-8 text-center">#</TableHead>
               <TableHead className="w-40">Tx Hash</TableHead>
-              <TableHead className="w-32 flex items-center gap-1">
+              <TableHead className="w-32">
                 Time
               </TableHead>
               <TableHead className="w-40">Sent</TableHead>
               <TableHead className="w-40">Received</TableHead>
-              <TableHead className="w-48 text-right">Received Value</TableHead>
 
               <TableHead className="w-48 text-right">Gas</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <AnimatePresence mode="popLayout">
-              {transactions.length === 0 && !showSkeleton ? (
+              {filteredTransactions.length === 0 && !showSkeleton ? (
                 <motion.tr
                   key="no-data"
                   initial={{ opacity: 0 }}
@@ -83,11 +85,10 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></TableCell>
-                        <TableCell><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></TableCell>
                       </TableRow>
                     );
                   }
-                  const tx = transactions[i];
+                  const tx = filteredTransactions[i];
                   if (!tx) return null;
                   return (
                     <motion.tr
@@ -98,7 +99,7 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
                       transition={{ duration: 0.2, delay: i * 0.05 }}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
-                      <TableCell className="text-center text-muted-foreground">{transactions.length - i}</TableCell>
+                      <TableCell className="text-center text-muted-foreground">{filteredTransactions.length - i}</TableCell>
                       <TableCell className="">
                         <a href={`https://bscscan.com/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
                           {truncateMiddle(tx.hash)}
@@ -107,14 +108,12 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
                       </TableCell>
                       <TableCell>{timeAgo(tx.timestamp)}</TableCell>
                       <TableCell className="">
-                        {tx.from.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.from.address)})</p>
+                        {tx.from.value.toFixed(6)} {tx.from.symbol === 'BSC-USD' ? 'USDT' : tx.from.symbol} <p className="text-sm text-muted-foreground">({truncateMiddle(tx.from.address)})</p>
                       </TableCell>
                       <TableCell className="">
-                        {tx.to.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</p>
+                        {tx.to.value.toFixed(6)} {tx.to.symbol === 'BSC-USD' ? 'USDT' : tx.to.symbol} <p className="text-sm text-muted-foreground">({truncateMiddle(tx.to.address)})</p>
                       </TableCell>
-                      <TableCell className="text-right">
-                        {tx.to.value.toFixed(6)}
-                      </TableCell>
+
                       <TableCell className="text-right">
                         {tx.gas} <span className="text-xs text-muted-foreground">BNB</span>
                       </TableCell>

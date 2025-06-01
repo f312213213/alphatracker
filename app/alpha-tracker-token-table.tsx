@@ -87,18 +87,18 @@ export default function AlphaTrackerTokenTable({ data, isLoading, tokenList, tok
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
                       <TableCell className="text-center text-muted-foreground">{tokenList.length - i}</TableCell>
-                      <TableCell>{token} <p className="text-xs text-muted-foreground">({truncateMiddle(tokenMap[token].address)})</p></TableCell>
+                      <TableCell>{token === 'BSC-USD' ? 'USDT' : token} <p className="text-xs text-muted-foreground">({truncateMiddle(tokenMap[token].address)})</p></TableCell>
                       <TableCell className="text-right">{tokenMap[token].outgoing.toFixed(6)}</TableCell>
                       <TableCell className="text-right">{tokenMap[token].incoming.toFixed(6)}</TableCell>
                       <TableCell className={cn("text-right", {
                         "text-red-500": tokenMap[token].incoming - tokenMap[token].outgoing < 0,
                         "text-green-500": tokenMap[token].incoming - tokenMap[token].outgoing > 0,
-                        "text-black dark:text-white": tokenMap[token].incoming - tokenMap[token].outgoing === 0,
+                        "text-black dark:text-gray-400": tokenMap[token].incoming - tokenMap[token].outgoing === 0,
                       })}>{(tokenMap[token].incoming - tokenMap[token].outgoing).toFixed(6)}</TableCell>
                       <TableCell className={cn("text-right", {
                         "text-red-500": tokenMap[token].profit < 0,
                         "text-green-500": tokenMap[token].profit > 0,
-                        "text-black dark:text-white": tokenMap[token].profit === 0,
+                        "text-black dark:text-gray-400": tokenMap[token].profit === 0,
                       })}>{tokenMap[token].profit.toFixed(6)}</TableCell>
                     </motion.tr>
                   );

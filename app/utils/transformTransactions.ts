@@ -64,6 +64,7 @@ interface TransformedTransaction {
     timestamp: number;
     gas: number | null;
     status: 'success' | 'fail';
+    contributeToVolume: boolean;
     from: {
         address: string;
         symbol: string;
@@ -246,6 +247,7 @@ export function transformTransactions(
                         timestamp: outgoing.timestamp,
                         gas: outgoing.gas,
                         status: outgoing.status,
+                        contributeToVolume: !!alphaListMap[incoming.symbol],
                         from: {
                             address: outgoing.contractAddress, // Contract address for outgoing token
                             symbol: outgoing.symbol,
@@ -269,6 +271,7 @@ export function transformTransactions(
                     timestamp: movement.timestamp,
                     gas: movement.gas,
                     status: movement.status,
+                    contributeToVolume: !!alphaListMap[movement.symbol],
                     from: {
                         address: userAddress,
                         symbol: movement.symbol,
@@ -291,6 +294,7 @@ export function transformTransactions(
                     timestamp: movement.timestamp,
                     gas: movement.gas,
                     status: movement.status,
+                    contributeToVolume: !!alphaListMap[movement.symbol],
                     from: {
                         address: movement.fromAddress,
                         symbol: movement.symbol,

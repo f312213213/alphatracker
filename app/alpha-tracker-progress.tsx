@@ -173,7 +173,7 @@ export default function AlphaTrackerProgress() {
             ) : (
               <>
                 <span>${previousThreshold.toLocaleString()}</span>
-                <span>${progressValue.toLocaleString()} / ${progressMax.toLocaleString()}</span>
+                <span><span className="dark:text-white text-black font-bold">${progressValue.toLocaleString()} </span>/ ${progressMax.toLocaleString()}</span>
               </>
             )}
           </div>
