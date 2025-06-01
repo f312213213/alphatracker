@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 function truncateMiddle(str: string, front = 6, back = 6) {
   if (!str) return "";
@@ -57,7 +58,6 @@ export default function AlphaTrackerProgress() {
   const previousThreshold = points > 1 ? getNextPointsThreshold(points - 1) : 0;
   const progressValue = volume;
   const progressMax = nextThreshold;
-  const gasFee = data?.transactions?.reduce((acc: number, transaction: any) => acc + transaction.gas, 0);
   const showSkeleton = isLoading;
 
   return (
@@ -140,7 +140,11 @@ export default function AlphaTrackerProgress() {
               {showSkeleton ? (
                 <Skeleton className="h-7 w-16 mt-1" />
               ) : (
-                <div className="text-lg font-semibold mt-1 text-red-500">
+                <div className={cn("text-lg font-semibold mt-1", {
+                  "text-red-500": profit < 0,
+                  "text-green-500": profit > 0,
+                  "text-black dark:text-white": profit === 0,
+                })}>
                   ${(profit).toLocaleString()} <span className="text-xs text-muted-foreground">(usd)</span>
                 </div>
               )}
