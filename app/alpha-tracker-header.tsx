@@ -8,7 +8,7 @@ import { SearchIcon, XIcon, ClockIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useAlphaData } from "./hooks/useAlphaData";
 import { useRecentSearches } from "./hooks/useRecentSearches";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 // Helper function to truncate address for display
@@ -18,13 +18,36 @@ function truncateAddress(address: string, front = 6, back = 4) {
   return `${address.slice(0, front)}...${address.slice(-back)}`;
 }
 
+// Helper function to validate Ethereum address
+function isValidEthereumAddress(address: string): boolean {
+  if (!address) return false;
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
 export default function AlphaTrackerHeader() {
   const [address, setAddress] = useQueryState('address');
+  const [inputValue, setInputValue] = useState(address || "");
   const { trigger, isLoading, isValidAddress, data } = useAlphaData();
   // const { recentSearches, addRecentSearch, clearRecentSearches, removeRecentSearch } = useRecentSearches();
 
+  // Sync inputValue with address when address changes from external sources
+  useEffect(() => {
+    setInputValue(address || "");
+  }, [address]);
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+
+    // Only set address if the input is valid or empty
+    if (value === "" || isValidEthereumAddress(value)) {
+      setAddress(value || null);
+    }
+  };
+
   const handleSearch = async () => {
-    if (address && isValidAddress) {
+    // Set address to current input value and trigger search
+    if (inputValue && isValidEthereumAddress(inputValue)) {
+      setAddress(inputValue);
       await trigger();
     }
   };
@@ -34,6 +57,7 @@ export default function AlphaTrackerHeader() {
       return
     }
     setAddress(searchAddress);
+    setInputValue(searchAddress);
     // Trigger search automatically when badge is clicked
     // We need to wait for the address to be set in the URL state
     setTimeout(async () => {
@@ -72,14 +96,14 @@ export default function AlphaTrackerHeader() {
         <div className="flex gap-2 flex-col sm:flex-row">
           <div className="flex-1">
             <Input
-              className={`disabled:opacity-50 ${address && !isValidAddress ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+              className={`disabled:opacity-50 ${inputValue && !isValidEthereumAddress(inputValue) ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
               type="text"
               disabled={isLoading}
               placeholder="Enter your Binance wallet address"
-              value={address || ""}
-              onChange={(e) => setAddress(e.target.value)}
+              value={inputValue}
+              onChange={(e) => handleInputChange(e.target.value)}
             />
-            {address && !isValidAddress && (
+            {inputValue && !isValidEthereumAddress(inputValue) && (
               <p className="text-sm text-red-500 mt-1">
                 Please enter a valid Ethereum wallet address (0x followed by 40 hexadecimal characters)
               </p>
@@ -87,7 +111,7 @@ export default function AlphaTrackerHeader() {
           </div>
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !isValidAddress}
+            disabled={isLoading || !isValidEthereumAddress(inputValue)}
           >
             {isLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />

@@ -107,7 +107,7 @@ export default function AlphaTrackerProgress() {
                 <Skeleton className="h-7 w-24 mt-1" />
               ) : (
                 <div className="text-lg font-semibold text-black dark:text-white mt-1">
-                  ${volume.toLocaleString()} <span className="text-xs text-muted-foreground">({data?.volume.toLocaleString()})</span>
+                  ${volume?.toLocaleString()} <span className="text-xs text-muted-foreground">({data?.volume?.toLocaleString()})</span>
                 </div>
               )}
             </div>

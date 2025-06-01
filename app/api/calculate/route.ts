@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { transformTransactions } from '@/app/utils/transformTransactions'
 import { etherscanRateLimiter } from '@/app/utils/rateLimiter';
 import { etherscanApiKeyRotator } from '@/app/utils/apiKeyRotator';
+import { bscscanClient } from '@/app/utils/bscscanClient';
 
 const DEX_ROUTER_ADDRESS = '0xb300000b72deaeb607a12d5f54773d1c19c7028d';
 
@@ -44,86 +45,86 @@ const POST = async (req: Request) => {
         );
     }
 
-    const alphaListResponse = await getAlphaList();
+    try {
+        const alphaListResponse = await getAlphaList();
 
-    const bnbPrice = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT");
-    const bnbPriceData = await bnbPrice.json();
-    const bnbPriceValue = bnbPriceData.price;
+        const bnbPrice = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT");
+        const bnbPriceData = await bnbPrice.json();
+        const bnbPriceValue = bnbPriceData.price;
 
-    const accountNormalUrl = new URL("https://api.etherscan.io/v2/api");
-    accountNormalUrl.searchParams.set("chainid", "56");
-    accountNormalUrl.searchParams.set("module", "account");
-    accountNormalUrl.searchParams.set("action", "txlist");
-    accountNormalUrl.searchParams.set("address", address);
-    accountNormalUrl.searchParams.set("startblock", blockNumber);
-    accountNormalUrl.searchParams.set("endblock", "99999999");
-    accountNormalUrl.searchParams.set("page", "1");
-    accountNormalUrl.searchParams.set("offset", "10000");
-    accountNormalUrl.searchParams.set("sort", "desc");
-    accountNormalUrl.searchParams.set("apikey", etherscanApiKeyRotator.getNextKey() || "");
+        // Use the robust BSCSCAN client with retry logic
+        const [accountNormalResponse, accountInternalResponse, accountBEP20Response] = await Promise.all([
+            etherscanRateLimiter.execute(() =>
+                bscscanClient.getTransactionList({
+                    address,
+                    startblock: blockNumber,
+                    apikey: etherscanApiKeyRotator.getNextKey() || "",
+                    action: 'txlist'
+                })
+            ),
+            etherscanRateLimiter.execute(() =>
+                bscscanClient.getTransactionList({
+                    address,
+                    startblock: blockNumber,
+                    apikey: etherscanApiKeyRotator.getNextKey() || "",
+                    action: 'txlistinternal'
+                })
+            ),
+            etherscanRateLimiter.execute(() =>
+                bscscanClient.getTransactionList({
+                    address,
+                    startblock: blockNumber,
+                    apikey: etherscanApiKeyRotator.getNextKey() || "",
+                    action: 'tokentx'
+                })
+            )
+        ]);
 
-    const accountNormalUrlData = await etherscanRateLimiter.execute(async () => {
-        const response = await fetch(accountNormalUrl);
-        return response.json();
-    });
+        // Validate and extract results with better error logging
+        const normalTransactions = accountNormalResponse.result || [];
+        const internalTransactions = accountInternalResponse.result || [];
+        const tokenTransactions = accountBEP20Response.result || [];
 
-    const accountInternalUrl = new URL("https://api.etherscan.io/v2/api");
-    accountInternalUrl.searchParams.set("chainid", "56");
-    accountInternalUrl.searchParams.set("module", "account");
-    accountInternalUrl.searchParams.set("action", "txlistinternal");
-    accountInternalUrl.searchParams.set("address", address);
-    accountInternalUrl.searchParams.set("startblock", blockNumber);
-    accountInternalUrl.searchParams.set("endblock", "99999999");
-    accountInternalUrl.searchParams.set("page", "1");
-    accountInternalUrl.searchParams.set("offset", "10000");
-    accountInternalUrl.searchParams.set("sort", "desc");
-    accountInternalUrl.searchParams.set("apikey", etherscanApiKeyRotator.getNextKey() || "");
+        console.log('Transaction data summary:', {
+            address,
+            blockNumber,
+            normalCount: normalTransactions.length,
+            internalCount: internalTransactions.length,
+            tokenCount: tokenTransactions.length,
+            circuitBreakerStatus: bscscanClient.getCircuitBreakerStatus()
+        });
 
-    const accountInternalUrlData = await etherscanRateLimiter.execute(async () => {
-        const response = await fetch(accountInternalUrl);
-        return response.json();
-    });
+        // Check for suspiciously empty results and warn
+        if (normalTransactions.length === 0 && internalTransactions.length === 0 && tokenTransactions.length === 0) {
+            console.warn('All transaction queries returned empty results - this might indicate an API issue or new wallet', {
+                address,
+                blockNumber,
+                normalStatus: accountNormalResponse.status,
+                internalStatus: accountInternalResponse.status,
+                tokenStatus: accountBEP20Response.status
+            });
+        }
 
-    const accountBEP20Url = new URL("https://api.etherscan.io/v2/api");
-    accountBEP20Url.searchParams.set("chainid", "56");
-    accountBEP20Url.searchParams.set("module", "account");
-    accountBEP20Url.searchParams.set("action", "tokentx");
-    accountBEP20Url.searchParams.set("address", address);
-    accountBEP20Url.searchParams.set("startblock", blockNumber);
-    accountBEP20Url.searchParams.set("endblock", "99999999");
-    accountBEP20Url.searchParams.set("page", "1");
-    accountBEP20Url.searchParams.set("offset", "10000");
-    accountBEP20Url.searchParams.set("sort", "desc");
-    accountBEP20Url.searchParams.set("apikey", etherscanApiKeyRotator.getNextKey() || "");
+        const alphaList = alphaListResponse.list;
+        const alphaListMap = alphaListResponse.map;
 
-    const accountBEP20UrlData = await etherscanRateLimiter.execute(async () => {
-        const response = await fetch(accountBEP20Url);
-        return response.json();
-    });
+        const transformedTransactions = transformTransactions(
+            normalTransactions.filter((item: any) => item.from === DEX_ROUTER_ADDRESS || item.to === DEX_ROUTER_ADDRESS),
+            internalTransactions,
+            tokenTransactions.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
+            address.toLowerCase(),
+            bnbPriceValue,
+            alphaListMap
+        );
 
-    const alphaList = alphaListResponse.list;
-    const alphaListMap = alphaListResponse.map;
+        const priceMap = alphaList.reduce((acc: any, item: any) => {
+            acc[item.symbol] = item.price;
+            return acc;
+        }, {
+            BNB: bnbPriceValue,
+        });
 
-    const transformedTransactions = transformTransactions(
-        (accountNormalUrlData.result || []).filter((item: any) => item.from === DEX_ROUTER_ADDRESS || item.to === DEX_ROUTER_ADDRESS),
-        accountInternalUrlData.result || [],
-        accountBEP20UrlData.result.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
-        address.toLowerCase(),
-        bnbPriceValue,
-        alphaListMap
-    );
-
-    const priceMap = alphaList.reduce((acc: any, item: any) => {
-        acc[item.symbol] = item.price;
-        return acc;
-    }, {
-        BNB: bnbPriceValue,
-    });
-
-    return NextResponse.json({
-        price: priceMap,
-        transactions: transformedTransactions,
-        volume: transformedTransactions.reduce((acc: number, item: any) => {
+        const volume = transformedTransactions.reduce((acc: number, item: any) => {
             if (item.to.symbol !== "BNB") {
                 const token = alphaListMap[item.to.symbol];
                 const price = token.price;
@@ -132,8 +133,45 @@ const POST = async (req: Request) => {
                 return acc + valueInUSD;
             }
             return acc;
-        }, 0),
-    });
+        }, 0);
+
+        return NextResponse.json({
+            price: priceMap,
+            transactions: transformedTransactions,
+            volume
+        });
+
+    } catch (error) {
+        console.error('Error in calculate route:', error);
+
+        // Provide more specific error messages
+        if (error instanceof Error) {
+            if (error.message.includes('circuit breaker')) {
+                return NextResponse.json(
+                    {
+                        error: "API temporarily unavailable due to reliability issues. Please try again in a few minutes.",
+                        retryAfter: 60
+                    },
+                    { status: 503 }
+                );
+            }
+
+            if (error.message.includes('failed after')) {
+                return NextResponse.json(
+                    {
+                        error: "Unable to retrieve data after multiple attempts. The blockchain API may be experiencing issues.",
+                        suggestion: "Please try again in a few moments"
+                    },
+                    { status: 502 }
+                );
+            }
+        }
+
+        return NextResponse.json(
+            { error: "Internal server error occurred while fetching transaction data" },
+            { status: 500 }
+        );
+    }
 };
 
 export { POST };

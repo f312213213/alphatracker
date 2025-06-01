@@ -10,6 +10,7 @@ import AlphaTrackerTransactionTable from "./alpha-tracker-transaction-table"
 import { useQueryState } from "nuqs";
 import { useAlphaData } from "./hooks/useAlphaData";
 import AlphaTrackerTokenTable from "./alpha-tracker-token-table";
+
 export default function AlphaTrackerTabs() {
 
   const [address] = useQueryState('address');
@@ -31,7 +32,6 @@ export default function AlphaTrackerTabs() {
       <TabsContent value="tokens">
         <AlphaTrackerTokenTable data={data} isLoading={isLoading} tokenList={tokenList} tokenMap={tokenMap} />
       </TabsContent>
-
     </Tabs>
   )
 }
