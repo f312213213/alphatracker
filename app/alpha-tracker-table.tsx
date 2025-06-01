@@ -31,10 +31,6 @@ export default function AlphaTrackerTable() {
   const showSkeleton = isLoading;
   const rowCount = showSkeleton ? 8 : transactions.length;
 
-  if (!address || !data && !isLoading) {
-    return null;
-  }
-
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -114,7 +110,7 @@ export default function AlphaTrackerTable() {
                         {tx.to.symbol} <p className="text-xs text-muted-foreground">({truncateMiddle(tx.to.address)})</p>
                       </TableCell>
                       <TableCell className="text-right">
-                        {tx.value.toFixed(6)}
+                        {tx.to.value.toFixed(6)}
                       </TableCell>
                       <TableCell className="text-right">
                         {tx.gas} <span className="text-xs text-muted-foreground">BNB</span>

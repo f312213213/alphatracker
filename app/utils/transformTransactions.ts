@@ -29,16 +29,17 @@ interface TransformedTransaction {
     timestamp: number;
     gas: number;
     status: 'success' | 'failed';
-    value: number;
     from: {
         address: string;
         symbol: string;
         decimals: number;
+        value: number;
     };
     to: {
         address: string;
         symbol: string;
         decimals: number;
+        value: number;
     };
 }
 
@@ -67,38 +68,39 @@ export function transformTransactions(rawTransactions: RawTransaction[], address
         const outgoingTx = txs.find(tx => tx.from === address);
         const incomingTx = txs.find(tx => tx.to === address);
 
-        let value = 0;
-
-        if (incomingTx) {
-            value = new BigNumber(incomingTx.value)
-                .dividedBy(new BigNumber(10).pow(parseInt(incomingTx.tokenDecimal || '18')))
+        const outGoingValue = outgoingTx ? new BigNumber(outgoingTx.value)
+            .dividedBy(new BigNumber(10).pow(parseInt(outgoingTx.tokenDecimal || '18')))
+            .toNumber() : new BigNumber(incomingTx?.value ?? 0)
+                .multipliedBy(alphaListMap[incomingTx?.tokenSymbol ?? 'BNB'].price)
+                .dividedBy(bnbPrice)
+                .dividedBy(new BigNumber(10).pow(18))
                 .toNumber();
-        } else {
-            // incomingToken is BNB
-            if (outgoingTx) {
-                value = new BigNumber(outgoingTx.value)
-                    .multipliedBy(alphaListMap[outgoingTx.tokenSymbol].price)
-                    .dividedBy(bnbPrice)
-                    .dividedBy(new BigNumber(10).pow(18))
-                    .toNumber();
-            }
-        }
+
+        const incomingValue = incomingTx ? new BigNumber(incomingTx.value)
+            .dividedBy(new BigNumber(10).pow(parseInt(incomingTx.tokenDecimal || '18')))
+            .toNumber() : new BigNumber(outgoingTx?.value ?? 0)
+                .multipliedBy(alphaListMap[outgoingTx?.tokenSymbol ?? 'BNB'].price)
+                .dividedBy(bnbPrice)
+                .dividedBy(new BigNumber(10).pow(18))
+                .toNumber();
+
 
         return {
             hash,
             timestamp,
             gas: gasCost,
             status,
-            value,
             from: {
                 address: outgoingTx?.contractAddress || '0x0000000000000000000000000000000000000000',
                 symbol: outgoingTx?.tokenSymbol || 'BNB',
                 decimals: parseInt(outgoingTx?.tokenDecimal || '18'),
+                value: outGoingValue,
             },
             to: {
                 address: incomingTx?.contractAddress || '0x0000000000000000000000000000000000000000',
                 symbol: incomingTx?.tokenSymbol || 'BNB',
                 decimals: parseInt(incomingTx?.tokenDecimal || '18'),
+                value: incomingValue,
             },
         };
     });

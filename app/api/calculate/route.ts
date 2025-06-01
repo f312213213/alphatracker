@@ -60,6 +60,8 @@ const POST = async (req: Request) => {
     const accountInfoUrlResponse = await fetch(accountInfoUrl);
     const accountInfoUrlData = await accountInfoUrlResponse.json();
 
+    console.dir(accountInfoUrlData);
+
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
 
@@ -76,7 +78,7 @@ const POST = async (req: Request) => {
             if (item.to.symbol !== "BNB") {
                 const token = alphaListMap[item.to.symbol];
                 const price = token.price;
-                const value = item.value;
+                const value = item.to.value;
                 const valueInUSD = value * price;
                 return acc + valueInUSD;
             }
