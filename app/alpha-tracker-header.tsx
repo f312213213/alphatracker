@@ -21,7 +21,7 @@ function truncateAddress(address: string, front = 6, back = 4) {
 export default function AlphaTrackerHeader() {
   const [address, setAddress] = useQueryState('address');
   const { trigger, isLoading, isValidAddress, data } = useAlphaData();
-  const { recentSearches, addRecentSearch, clearRecentSearches, removeRecentSearch } = useRecentSearches();
+  // const { recentSearches, addRecentSearch, clearRecentSearches, removeRecentSearch } = useRecentSearches();
 
   const handleSearch = async () => {
     if (address && isValidAddress) {
@@ -41,18 +41,18 @@ export default function AlphaTrackerHeader() {
     }, 100);
   };
 
-  const handleRemoveRecentSearch = (searchAddress: string, e: React.MouseEvent) => {
+  // const handleRemoveRecentSearch = (searchAddress: string, e: React.MouseEvent) => {
 
-    e.stopPropagation(); // Prevent badge click
-    removeRecentSearch(searchAddress);
-  };
+  //   e.stopPropagation(); // Prevent badge click
+  //   removeRecentSearch(searchAddress);
+  // };
 
-  // Add successful searches to recent searches
-  useEffect(() => {
-    if (data && address && isValidAddress) {
-      addRecentSearch(address);
-    }
-  }, [data, address, isValidAddress, addRecentSearch]);
+  // // Add successful searches to recent searches
+  // useEffect(() => {
+  //   if (data && address && isValidAddress) {
+  //     addRecentSearch(address);
+  //   }
+  // }, [data, address, isValidAddress, addRecentSearch]);
 
   return (
     <Card>
@@ -98,7 +98,7 @@ export default function AlphaTrackerHeader() {
         </div>
 
         {/* Recent Searches */}
-        {recentSearches.length > 0 && (
+        {/* {recentSearches.length > 0 && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -135,7 +135,7 @@ export default function AlphaTrackerHeader() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
       </CardContent>
     </Card>
   );

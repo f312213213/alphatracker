@@ -2,6 +2,7 @@ import { useQueryState } from "nuqs";
 import useSWR from "swr";
 import { useGATracking } from "./useGATracking";
 import { BlockCache } from "../utils/blockCache";
+import { useMemo } from "react";
 
 const validateAddress = (address: string): boolean => {
     // Check if address starts with 0x and has 42 characters (0x + 40 hex chars)
@@ -62,7 +63,11 @@ export function useAlphaData() {
         BlockCache.clearExpiredCache();
     }
 
-    const tokenMap = swrData?.transactions?.reduce((acc: any, tx: any) => {
+    const transactions = useMemo(() => {
+        return (swrData?.transactions || []).filter((tx: any) => tx.status === 'success');
+    }, [swrData?.transactions]);
+
+    const tokenMap = transactions.reduce((acc: any, tx: any) => {
         // Handle incoming tokens (to)
         if (tx.to.symbol) {
             if (!acc[tx.to.symbol]) {
@@ -100,7 +105,11 @@ export function useAlphaData() {
     });
 
     return {
-        data: swrData,
+        data: {
+            transactions: transactions,
+            price: swrData?.price,
+            volume: swrData?.volume,
+        },
         tokenList: tokenList,
         tokenMap: tokenMap,
         error: swrError,

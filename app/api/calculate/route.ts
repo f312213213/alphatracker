@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { transformTransactions } from '@/app/utils/transformTransactions'
 
+const DEX_ROUTER_ADDRESS = '0xb300000b72deaeb607a12d5f54773d1c19c7028d';
+
 
 const getAlphaList = async () => {
     const response = await fetch("https://www.binance.com/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list")
@@ -93,12 +95,11 @@ const POST = async (req: Request) => {
     const accountBEP20UrlResponse = await fetch(accountBEP20Url);
     const accountBEP20UrlData = await accountBEP20UrlResponse.json();
 
-
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
 
     const transformedTransactions = transformTransactions(
-        accountNormalUrlData.result || [],
+        (accountNormalUrlData.result || []).filter((item: any) => item.from === DEX_ROUTER_ADDRESS || item.to === DEX_ROUTER_ADDRESS),
         accountInternalUrlData.result || [],
         accountBEP20UrlData.result.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
         address.toLowerCase(),
