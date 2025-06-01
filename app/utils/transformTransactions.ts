@@ -84,6 +84,7 @@ interface TransactionMovement {
     gas: number | null;
     status: 'success' | 'fail';
     fromAddress: string;
+    contractAddress: string;
     toAddress: string;
     symbol: string;
     decimals: number;
@@ -167,6 +168,7 @@ export function transformTransactions(
                     gas,
                     status,
                     fromAddress: tx.from,
+                    contractAddress: '0x0000000000000000000000000000000000000000',
                     toAddress: tx.to,
                     symbol: 'BNB',
                     decimals: 18,
@@ -187,6 +189,7 @@ export function transformTransactions(
                     gas,
                     status,
                     fromAddress: tx.from,
+                    contractAddress: tx.contractAddress,
                     toAddress: tx.to,
                     symbol: tx.tokenSymbol,
                     decimals: parseInt(tx.tokenDecimal),
@@ -209,6 +212,8 @@ export function transformTransactions(
     }, {} as Record<string, TransactionMovement[]>);
 
     const result: TransformedTransaction[] = [];
+
+    console.log('movementGroups', movementGroups);
 
     // Create transactions from movement pairs
     Object.entries(movementGroups).forEach(([hash, movementList]) => {
@@ -244,13 +249,13 @@ export function transformTransactions(
                         gas: outgoing.gas,
                         status: outgoing.status,
                         from: {
-                            address: outgoing.toAddress, // Contract address for outgoing token
+                            address: outgoing.contractAddress, // Contract address for outgoing token
                             symbol: outgoing.symbol,
                             decimals: outgoing.decimals,
                             value: outgoing.value,
                         },
                         to: {
-                            address: incoming.fromAddress, // Contract address for incoming token
+                            address: incoming.contractAddress, // Contract address for incoming token
                             symbol: incoming.symbol,
                             decimals: incoming.decimals,
                             value: incoming.value,

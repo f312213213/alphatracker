@@ -10,8 +10,9 @@ const DEX_ROUTER_ADDRESS = '0xb300000b72deaeb607a12d5f54773d1c19c7028d';
 const getAlphaList = async () => {
     const response = await fetch("https://www.binance.com/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list")
     const data = await response.json();
+    const list = data.data
     return {
-        list: data.data.map((item: any) => ({
+        list: list.map((item: any) => ({
             symbol: item.symbol,
             name: item.name,
             price: item.price,
@@ -21,7 +22,7 @@ const getAlphaList = async () => {
             chainId: item.chainId,
             network: item.network,
         })),
-        map: data.data.reduce((acc: any, item: any) => {
+        map: list.reduce((acc: any, item: any) => {
             acc[item.symbol] = item;
             return acc;
         }, {}),
@@ -85,14 +86,18 @@ const POST = async (req: Request) => {
         const internalTransactions = accountInternalResponse.result || [];
         const tokenTransactions = accountBEP20Response.result || [];
 
-        console.log('Transaction data summary:', {
-            address,
-            blockNumber,
-            normalCount: normalTransactions.length,
-            internalCount: internalTransactions.length,
-            tokenCount: tokenTransactions.length,
-            circuitBreakerStatus: bscscanClient.getCircuitBreakerStatus()
-        });
+        // console.log('normalTransactions', normalTransactions);
+        // console.log('internalTransactions', internalTransactions);
+        // console.log('tokenTransactions', tokenTransactions);
+
+        // console.log('Transaction data summary:', {
+        //     address,
+        //     blockNumber,
+        //     normalCount: normalTransactions.length,
+        //     internalCount: internalTransactions.length,
+        //     tokenCount: tokenTransactions.length,
+        //     circuitBreakerStatus: bscscanClient.getCircuitBreakerStatus()
+        // });
 
         // Check for suspiciously empty results and warn
         if (normalTransactions.length === 0 && internalTransactions.length === 0 && tokenTransactions.length === 0) {
@@ -111,7 +116,7 @@ const POST = async (req: Request) => {
         const transformedTransactions = transformTransactions(
             normalTransactions.filter((item: any) => item.from === DEX_ROUTER_ADDRESS || item.to === DEX_ROUTER_ADDRESS),
             internalTransactions,
-            tokenTransactions.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
+            tokenTransactions,
             address.toLowerCase(),
             bnbPriceValue,
             alphaListMap
@@ -122,10 +127,15 @@ const POST = async (req: Request) => {
             return acc;
         }, {
             BNB: bnbPriceValue,
+            'BSC-USD': 1,
+            'USDC': 1,
+            'USDT': 1,
+            'USDS': 1,
+            'TUSD': 1,
         });
 
         const volume = transformedTransactions.reduce((acc: number, item: any) => {
-            if (item.to.symbol !== "BNB") {
+            if (alphaListMap[item.to.symbol]) {
                 const token = alphaListMap[item.to.symbol];
                 const price = token.price;
                 const value = item.to.value;

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Copy, ExternalLink, Info, Check } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -95,6 +96,15 @@ export default function AlphaTrackerProgress() {
             {/* <Button variant="ghost" size="icon" className="h-6 w-6 p-0"><ExternalLink className="h-4 w-4" /></Button> */}
           </div>
         </div>
+
+        {/* <Alert variant="destructive">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Transaction Tracking Notice</AlertTitle>
+          <AlertDescription>
+            Currently, only BNB-based transactions are counted for volume calculation.
+            Stablecoin swaps (USDT, USDC, etc.) are not included in the tracking.
+          </AlertDescription>
+        </Alert> */}
 
         <div>
           {/* <div className="text-xl font-bold text-white dark:text-white">Stats</div> */}
