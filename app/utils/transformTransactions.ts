@@ -213,8 +213,6 @@ export function transformTransactions(
 
     const result: TransformedTransaction[] = [];
 
-    console.log('movementGroups', movementGroups);
-
     // Create transactions from movement pairs
     Object.entries(movementGroups).forEach(([hash, movementList]) => {
         // Sort movements by timestamp to ensure consistent pairing
