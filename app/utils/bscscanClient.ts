@@ -119,7 +119,6 @@ class BscscanClient {
                     await this.delay(delay);
                 }
 
-                console.log(`BSCSCAN API call attempt ${attempt + 1}:`, url.toString());
 
                 const response = await fetch(url.toString());
 
@@ -148,14 +147,13 @@ class BscscanClient {
                 }
 
                 this.recordSuccess();
-                console.log(`BSCSCAN API call successful on attempt ${attempt + 1}`);
                 return data;
 
             } catch (error) {
                 lastError = error instanceof Error ? error : new Error(String(error));
 
                 if (options.logErrors !== false) {
-                    console.error(`BSCSCAN API call failed on attempt ${attempt + 1}:`, lastError.message);
+                    console.error(`BSCSCAN API call ${url.toString()} failed on attempt ${attempt + 1}:`, lastError.message);
                 }
 
                 // Don't retry on certain errors
