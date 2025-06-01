@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { transformTransactions } from '@/app/utils/transformTransactions';
+import { transformTransactions } from '@/app/utils/transformTransactions'
+
 
 const getAlphaList = async () => {
     const response = await fetch("https://www.binance.com/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list")
@@ -45,28 +46,61 @@ const POST = async (req: Request) => {
     const bnbPriceData = await bnbPrice.json();
     const bnbPriceValue = bnbPriceData.price;
 
-    const accountInfoUrl = new URL("https://api.etherscan.io/v2/api");
-    accountInfoUrl.searchParams.set("chainid", "56");
-    accountInfoUrl.searchParams.set("module", "account");
-    accountInfoUrl.searchParams.set("action", "tokentx");
-    accountInfoUrl.searchParams.set("address", address);
-    accountInfoUrl.searchParams.set("startblock", blockNumber);
-    accountInfoUrl.searchParams.set("endblock", "99999999");
-    accountInfoUrl.searchParams.set("page", "1");
-    accountInfoUrl.searchParams.set("offset", "10000");
-    accountInfoUrl.searchParams.set("sort", "desc");
-    accountInfoUrl.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
+    const accountNormalUrl = new URL("https://api.etherscan.io/v2/api");
+    accountNormalUrl.searchParams.set("chainid", "56");
+    accountNormalUrl.searchParams.set("module", "account");
+    accountNormalUrl.searchParams.set("action", "txlist");
+    accountNormalUrl.searchParams.set("address", address);
+    accountNormalUrl.searchParams.set("startblock", blockNumber);
+    accountNormalUrl.searchParams.set("endblock", "99999999");
+    accountNormalUrl.searchParams.set("page", "1");
+    accountNormalUrl.searchParams.set("offset", "10000");
+    accountNormalUrl.searchParams.set("sort", "desc");
+    accountNormalUrl.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
 
-    const accountInfoUrlResponse = await fetch(accountInfoUrl);
-    const accountInfoUrlData = await accountInfoUrlResponse.json();
+    const accountNormalUrlResponse = await fetch(accountNormalUrl);
+    const accountNormalUrlData = await accountNormalUrlResponse.json();
 
-    console.dir(accountInfoUrlData);
+
+    const accountInternalUrl = new URL("https://api.etherscan.io/v2/api");
+    accountInternalUrl.searchParams.set("chainid", "56");
+    accountInternalUrl.searchParams.set("module", "account");
+    accountInternalUrl.searchParams.set("action", "txlistinternal");
+    accountInternalUrl.searchParams.set("address", address);
+    accountInternalUrl.searchParams.set("startblock", blockNumber);
+    accountInternalUrl.searchParams.set("endblock", "99999999");
+    accountInternalUrl.searchParams.set("page", "1");
+    accountInternalUrl.searchParams.set("offset", "10000");
+    accountInternalUrl.searchParams.set("sort", "desc");
+    accountInternalUrl.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
+
+    const accountInternalUrlResponse = await fetch(accountInternalUrl);
+    const accountInternalUrlData = await accountInternalUrlResponse.json();
+
+
+    const accountBEP20Url = new URL("https://api.etherscan.io/v2/api");
+    accountBEP20Url.searchParams.set("chainid", "56");
+    accountBEP20Url.searchParams.set("module", "account");
+    accountBEP20Url.searchParams.set("action", "tokentx");
+    accountBEP20Url.searchParams.set("address", address);
+    accountBEP20Url.searchParams.set("startblock", blockNumber);
+    accountBEP20Url.searchParams.set("endblock", "99999999");
+    accountBEP20Url.searchParams.set("page", "1");
+    accountBEP20Url.searchParams.set("offset", "10000");
+    accountBEP20Url.searchParams.set("sort", "desc");
+    accountBEP20Url.searchParams.set("apikey", process.env.ETHERSCAN_API_KEY || "");
+
+    const accountBEP20UrlResponse = await fetch(accountBEP20Url);
+    const accountBEP20UrlData = await accountBEP20UrlResponse.json();
+
 
     const alphaList = alphaListResponse.list;
     const alphaListMap = alphaListResponse.map;
 
     const transformedTransactions = transformTransactions(
-        accountInfoUrlData.result.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
+        accountNormalUrlData.result || [],
+        accountInternalUrlData.result || [],
+        accountBEP20UrlData.result.filter((item: any) => alphaList.find((alpha: any) => alpha.symbol === item.tokenSymbol)),
         address.toLowerCase(),
         bnbPriceValue,
         alphaListMap
