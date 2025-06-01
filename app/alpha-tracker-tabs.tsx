@@ -6,32 +6,30 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import AlphaTrackerTable from "./alpha-tracker-table"
-import { useState } from "react";
+import AlphaTrackerTransactionTable from "./alpha-tracker-transaction-table"
 import { useQueryState } from "nuqs";
 import { useAlphaData } from "./hooks/useAlphaData";
-
+import AlphaTrackerTokenTable from "./alpha-tracker-token-table";
 export default function AlphaTrackerTabs() {
-  const [tab, setTab] = useState('transactions');
 
   const [address] = useQueryState('address');
-  const { data, isLoading } = useAlphaData();
-
-  const transactions = data?.transactions || [];
-  const showSkeleton = isLoading;
+  const { data, isLoading, tokenList, tokenMap } = useAlphaData();
 
   if (!address || !data && !isLoading) {
     return null;
   }
 
   return (
-    <Tabs defaultValue="transactions" onValueChange={setTab}>
+    <Tabs defaultValue="transactions">
       <TabsList>
         <TabsTrigger value="transactions">Transactions</TabsTrigger>
         <TabsTrigger value="tokens">Tokens</TabsTrigger>
       </TabsList>
       <TabsContent value="transactions">
-        <AlphaTrackerTable />
+        <AlphaTrackerTransactionTable data={data} isLoading={isLoading} />
+      </TabsContent>
+      <TabsContent value="tokens">
+        <AlphaTrackerTokenTable data={data} isLoading={isLoading} tokenList={tokenList} tokenMap={tokenMap} />
       </TabsContent>
 
     </Tabs>

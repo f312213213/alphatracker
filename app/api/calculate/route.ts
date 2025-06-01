@@ -71,8 +71,16 @@ const POST = async (req: Request) => {
         bnbPriceValue,
         alphaListMap
     );
+
+    const priceMap = alphaList.reduce((acc: any, item: any) => {
+        acc[item.symbol] = item.price;
+        return acc;
+    }, {
+        BNB: bnbPriceValue,
+    });
+
     return NextResponse.json({
-        bnbPrice: bnbPriceValue,
+        price: priceMap,
         transactions: transformedTransactions,
         volume: transformedTransactions.reduce((acc: number, item: any) => {
             if (item.to.symbol !== "BNB") {

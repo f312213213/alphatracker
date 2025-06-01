@@ -62,8 +62,47 @@ export function useAlphaData() {
         BlockCache.clearExpiredCache();
     }
 
+    const tokenMap = swrData?.transactions?.reduce((acc: any, tx: any) => {
+        // Handle incoming tokens (to)
+        if (tx.to.symbol) {
+            if (!acc[tx.to.symbol]) {
+                acc[tx.to.symbol] = { incoming: 0, outgoing: 0, address: tx.to.address, profit: 0 };
+            }
+            acc[tx.to.symbol].incoming += tx.to.value;
+            acc[tx.to.symbol].profit += tx.to.value * swrData.price[tx.to.symbol];
+        }
+
+        // Handle outgoing tokens (from)
+        if (tx.from.symbol) {
+            if (!acc[tx.from.symbol]) {
+                acc[tx.from.symbol] = { incoming: 0, outgoing: 0, address: tx.from.address, profit: 0 };
+            }
+            acc[tx.from.symbol].outgoing += tx.from.value;
+            acc[tx.from.symbol].profit -= tx.from.value * swrData.price[tx.from.symbol];
+        }
+        return acc;
+    }, {});
+
+    const tokenList = Object.keys(tokenMap ?? {}).sort((a, b) => {
+        const profitA = tokenMap[a].profit;
+        const profitB = tokenMap[b].profit;
+
+        // First sort by positive profits
+        if (profitA > 0 && profitB <= 0) return -1;
+        if (profitA <= 0 && profitB > 0) return 1;
+
+        // Then sort by negative profits
+        if (profitA < 0 && profitB >= 0) return -1;
+        if (profitA >= 0 && profitB < 0) return 1;
+
+        // Finally sort by absolute profit value
+        return Math.abs(profitB) - Math.abs(profitA);
+    });
+
     return {
         data: swrData,
+        tokenList: tokenList,
+        tokenMap: tokenMap,
         error: swrError,
         isLoading: isLoading || isValidating,
         trigger: () => address && validateAddress(address) ? mutate(address) : null,

@@ -26,7 +26,7 @@ function truncateMiddle(str: string, front = 6, back = 6) {
 
 export default function AlphaTrackerProgress() {
   const [address] = useQueryState('address');
-  const { data, error, isLoading } = useAlphaData();
+  const { data, error, isLoading, tokenList, tokenMap } = useAlphaData();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -48,6 +48,8 @@ export default function AlphaTrackerProgress() {
       </Card>
     );
   }
+
+  const profit = tokenList.reduce((acc: number, token: any) => acc + tokenMap[token].profit, 0);
 
   const volume = (data?.volume * 2) || 0;
   const points = calculateAlphaPoints(volume);
@@ -134,12 +136,12 @@ export default function AlphaTrackerProgress() {
               )}
             </div>
             <div className="flex flex-col min-w-[80px]">
-              <div className="text-sm text-muted-foreground">Gas Fee</div>
+              <div className="text-sm text-muted-foreground">Profit</div>
               {showSkeleton ? (
                 <Skeleton className="h-7 w-16 mt-1" />
               ) : (
                 <div className="text-lg font-semibold mt-1 text-red-500">
-                  ${(gasFee * data?.bnbPrice).toLocaleString()} <span className="text-xs text-muted-foreground">(usd)</span>
+                  ${(profit).toLocaleString()} <span className="text-xs text-muted-foreground">(usd)</span>
                 </div>
               )}
             </div>

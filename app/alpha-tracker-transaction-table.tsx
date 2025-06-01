@@ -2,10 +2,14 @@
 
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAlphaData } from "./hooks/useAlphaData";
 import { useQueryState } from "nuqs";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+
+interface AlphaTrackerTableProps {
+  data: any;
+  isLoading: boolean;
+}
 
 function truncateMiddle(str: string, front = 6, back = 6) {
   if (!str) return "";
@@ -23,9 +27,8 @@ function timeAgo(timestamp: string | number) {
   return `${Math.floor(diff / 86400)} days ago`;
 }
 
-export default function AlphaTrackerTable() {
+export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaTrackerTableProps) {
   const [address] = useQueryState('address');
-  const { data, isLoading } = useAlphaData();
 
   const transactions = data?.transactions || [];
   const showSkeleton = isLoading;

@@ -52,12 +52,10 @@ export class BlockCache {
         const cachedBlock = this.getCachedBlock();
 
         if (cachedBlock && !this.isExpired(cachedBlock)) {
-            console.log('Using cached block number:', cachedBlock.blockNumber);
             return cachedBlock.blockNumber;
         }
 
         // Cache is expired or doesn't exist, fetch new block number
-        console.log('Fetching new block number...');
         try {
             const response = await fetch('/api/block');
             if (!response.ok) {
@@ -78,7 +76,6 @@ export class BlockCache {
             };
 
             this.setCachedBlock(newCachedBlock);
-            console.log('Cached new block number:', newCachedBlock.blockNumber);
 
             return newCachedBlock.blockNumber;
         } catch (error) {
@@ -97,7 +94,6 @@ export class BlockCache {
     static clearExpiredCache(): void {
         const cachedBlock = this.getCachedBlock();
         if (cachedBlock && this.isExpired(cachedBlock)) {
-            console.log('Clearing expired block cache');
             this.clearCache();
         }
     }
