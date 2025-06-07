@@ -6,14 +6,18 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import AlphaTrackerTransactionTable from "./alpha-tracker-transaction-table"
 import { useQueryState } from "nuqs";
 import { useAlphaData } from "./hooks/useAlphaData";
 import AlphaTrackerTokenTable from "./alpha-tracker-token-table";
+import { useState } from "react";
 
 export default function AlphaTrackerTabs() {
-
+  const [currentTab, setCurrentTab] = useQueryState('tab', { defaultValue: "transactions" });
   const [address] = useQueryState('address');
+  const [showAllTransactions, setShowAllTransactions] = useQueryState('showAllTransactions', { defaultValue: false });
   const { data, isLoading, tokenList, tokenMap } = useAlphaData();
 
   if (!address || !data && !isLoading) {
@@ -21,13 +25,29 @@ export default function AlphaTrackerTabs() {
   }
 
   return (
-    <Tabs defaultValue="transactions">
-      <TabsList>
-        <TabsTrigger value="transactions">Transactions</TabsTrigger>
-        <TabsTrigger value="tokens">Tokens</TabsTrigger>
-      </TabsList>
+    <Tabs value={currentTab} onValueChange={setCurrentTab}>
+      <div className="flex items-center justify-between">
+        <TabsList>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="tokens">Tokens</TabsTrigger>
+        </TabsList>
+        {
+          currentTab === "transactions" && (
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="show-all-transactions"
+                checked={showAllTransactions}
+                onCheckedChange={setShowAllTransactions}
+              />
+              <Label htmlFor="show-all-transactions" className="text-sm font-medium">
+                Show all transactions
+              </Label>
+            </div>
+          )
+        }
+      </div>
       <TabsContent value="transactions">
-        <AlphaTrackerTransactionTable data={data} isLoading={isLoading} />
+        <AlphaTrackerTransactionTable data={data} isLoading={isLoading} showAllTransactions={showAllTransactions} />
       </TabsContent>
       <TabsContent value="tokens">
         <AlphaTrackerTokenTable data={data} isLoading={isLoading} tokenList={tokenList} tokenMap={tokenMap} />
