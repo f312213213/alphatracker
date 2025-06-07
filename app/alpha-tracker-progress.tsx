@@ -131,7 +131,7 @@ export default function AlphaTrackerProgress() {
                 <br />
                 However, BSCScan is unstable and sometimes returns incorrect data.
                 <br />
-                This usually can be solved by refreshing the page.
+                This usually can be solved by retrying the search or refreshing the page.
               </p>
               <br />
               <p>
