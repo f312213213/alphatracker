@@ -38,13 +38,13 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
   const rowCount = showSkeleton ? 8 : filteredTransactions.length;
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <motion.div
         key={`${address}-${isLoading}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
         className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-x-auto"
       >
         <Table>
@@ -62,13 +62,14 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
             </TableRow>
           </TableHeader>
           <TableBody>
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
               {filteredTransactions.length === 0 && !showSkeleton ? (
                 <motion.tr
                   key="no-data"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.1 }}
                 >
                   <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                     No transactions found for this address
@@ -93,10 +94,10 @@ export default function AlphaTrackerTransactionTable({ data, isLoading }: AlphaT
                   return (
                     <motion.tr
                       key={tx.hash}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2, delay: i * 0.05 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.1, delay: i * 0.01 }}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
                       <TableCell className="text-center text-muted-foreground">{filteredTransactions.length - i}</TableCell>

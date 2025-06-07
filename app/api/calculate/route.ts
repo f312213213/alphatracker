@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { transformTransactions } from '@/app/utils/transformTransactions'
 import { etherscanRateLimiter } from '@/app/utils/rateLimiter';
 import { etherscanApiKeyRotator } from '@/app/utils/apiKeyRotator';
-import { bscscanClient } from '@/app/utils/bscscanClient';
 
 const DEX_ROUTER_ADDRESS = '0xb300000b72deaeb607a12d5f54773d1c19c7028d';
-
 
 const getAlphaList = async () => {
     const response = await fetch("https://www.binance.com/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list")
@@ -28,6 +26,15 @@ const getAlphaList = async () => {
         }, {}),
     };
 }
+
+// Simple function to make direct API calls without retry logic
+const makeDirectApiCall = async (url: string) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+};
 
 const POST = async (req: Request) => {
     const { address, blockNumber } = await req.json();
@@ -53,35 +60,31 @@ const POST = async (req: Request) => {
         const bnbPriceData = await bnbPrice.json();
         const bnbPriceValue = bnbPriceData.price;
 
-        // Use the robust BSCSCAN client with retry logic
+        // Build URLs for direct API calls
+        const baseUrl = "https://api.etherscan.io/v2/api";
+        const commonParams = new URLSearchParams({
+            chainid: "56",
+            module: "account",
+            address: address,
+            startblock: blockNumber,
+            endblock: "99999999",
+            page: "1",
+            offset: "10000",
+            sort: "desc"
+        });
+
+        const normalTxUrl = `${baseUrl}?${commonParams}&action=txlist&apikey=${etherscanApiKeyRotator.getNextKey()}`;
+        const internalTxUrl = `${baseUrl}?${commonParams}&action=txlistinternal&apikey=${etherscanApiKeyRotator.getNextKey()}`;
+        const tokenTxUrl = `${baseUrl}?${commonParams}&action=tokentx&apikey=${etherscanApiKeyRotator.getNextKey()}`;
+
+        // Use rate limiter with direct fetch calls (no retry logic)
         const [accountNormalResponse, accountInternalResponse, accountBEP20Response] = await Promise.all([
-            etherscanRateLimiter.execute(() =>
-                bscscanClient.getTransactionList({
-                    address,
-                    startblock: blockNumber,
-                    apikey: etherscanApiKeyRotator.getNextKey() || "",
-                    action: 'txlist'
-                })
-            ),
-            etherscanRateLimiter.execute(() =>
-                bscscanClient.getTransactionList({
-                    address,
-                    startblock: blockNumber,
-                    apikey: etherscanApiKeyRotator.getNextKey() || "",
-                    action: 'txlistinternal'
-                })
-            ),
-            etherscanRateLimiter.execute(() =>
-                bscscanClient.getTransactionList({
-                    address,
-                    startblock: blockNumber,
-                    apikey: etherscanApiKeyRotator.getNextKey() || "",
-                    action: 'tokentx'
-                })
-            )
+            etherscanRateLimiter.execute(() => makeDirectApiCall(normalTxUrl)),
+            etherscanRateLimiter.execute(() => makeDirectApiCall(internalTxUrl)),
+            etherscanRateLimiter.execute(() => makeDirectApiCall(tokenTxUrl))
         ]);
 
-        // Validate and extract results with better error logging
+        // Extract results
         const normalTransactions = accountNormalResponse.result || [];
         const internalTransactions = accountInternalResponse.result || [];
         const tokenTransactions = accountBEP20Response.result || [];
@@ -154,27 +157,15 @@ const POST = async (req: Request) => {
     } catch (error) {
         console.error('Error in calculate route:', error);
 
-        // Provide more specific error messages
+        // Simplified error handling without retry-specific messages
         if (error instanceof Error) {
-            if (error.message.includes('circuit breaker')) {
-                return NextResponse.json(
-                    {
-                        error: "API temporarily unavailable due to reliability issues. Please try again in a few minutes.",
-                        retryAfter: 60
-                    },
-                    { status: 503 }
-                );
-            }
-
-            if (error.message.includes('failed after')) {
-                return NextResponse.json(
-                    {
-                        error: "Unable to retrieve data after multiple attempts. The blockchain API may be experiencing issues.",
-                        suggestion: "Please try again in a few moments"
-                    },
-                    { status: 502 }
-                );
-            }
+            return NextResponse.json(
+                {
+                    error: "Failed to retrieve transaction data from blockchain API",
+                    details: error.message
+                },
+                { status: 502 }
+            );
         }
 
         return NextResponse.json(

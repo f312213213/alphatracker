@@ -27,13 +27,13 @@ export default function AlphaTrackerTokenTable({ data, isLoading, tokenList, tok
   const rowCount = showSkeleton ? 8 : tokenList.length;
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <motion.div
         key={`${address}-${isLoading}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
         className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-x-auto"
       >
         <Table>
@@ -49,13 +49,14 @@ export default function AlphaTrackerTokenTable({ data, isLoading, tokenList, tok
             </TableRow>
           </TableHeader>
           <TableBody>
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence>
               {tokenList.length === 0 && !showSkeleton ? (
                 <motion.tr
                   key="no-data"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.1 }}
                 >
                   <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                     No tokens recorded for this address
@@ -80,10 +81,10 @@ export default function AlphaTrackerTokenTable({ data, isLoading, tokenList, tok
                   return (
                     <motion.tr
                       key={token}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2, delay: i * 0.05 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.1, delay: i * 0.01 }}
                       className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
                     >
                       <TableCell className="text-center text-muted-foreground">{i + 1}</TableCell>
@@ -99,7 +100,7 @@ export default function AlphaTrackerTokenTable({ data, isLoading, tokenList, tok
                         "text-red-500": tokenMap[token].profit < 0,
                         "text-green-500": tokenMap[token].profit > 0,
                         "text-black dark:text-gray-400": tokenMap[token].profit === 0,
-                      })}>{tokenMap[token].profit.toFixed(6)}</TableCell>
+                      })}>{tokenMap[token].profit.toFixed(6) ?? (0).toFixed(6)}</TableCell>
                     </motion.tr>
                   );
                 })

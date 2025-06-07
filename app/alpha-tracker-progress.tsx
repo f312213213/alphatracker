@@ -51,7 +51,16 @@ export default function AlphaTrackerProgress() {
     );
   }
 
-  const profit = tokenList.reduce((acc: number, token: any) => acc + tokenMap[token].profit, 0);
+  const gasFee = data?.transactions.reduce((acc: number, token: any) => {
+    return acc + (token.gas * data.price.BNB);
+  }, 0);
+
+  const profit = tokenList.reduce((acc: number, token: any) => {
+    if (tokenMap[token].profit >= 0 || tokenMap[token].profit <= 0) {
+      return acc + tokenMap[token].profit;
+    }
+    return acc;
+  }, 0) - gasFee;
 
   const volume = (data?.volume * 2) || 0;
   const points = calculateAlphaPoints(volume);
@@ -146,7 +155,7 @@ export default function AlphaTrackerProgress() {
               )}
             </div>
             <div className="flex flex-col min-w-[80px]">
-              <div className="text-sm text-muted-foreground">Profit</div>
+              <div className="text-sm text-muted-foreground">Profit (slippage + gas)</div>
               {showSkeleton ? (
                 <Skeleton className="h-7 w-16 mt-1" />
               ) : (
