@@ -37,14 +37,14 @@ export default function AlphaTrackerTabs() {
 
   return (
     <Tabs value={currentTab} onValueChange={setCurrentTab}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <TabsList>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="tokens">Tokens</TabsTrigger>
         </TabsList>
         {
           currentTab === "transactions" && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ml-auto">
               <Switch
                 id="show-all-transactions"
                 checked={showAllTransactions}
