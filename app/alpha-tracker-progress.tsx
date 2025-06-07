@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Copy, ExternalLink, Info, Check } from "lucide-react";
+import { Copy, ExternalLink, Info, Check, X } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAlphaData } from "./hooks/useAlphaData";
@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 function truncateMiddle(str: string, front = 6, back = 6) {
@@ -30,11 +30,26 @@ export default function AlphaTrackerProgress() {
   const [address] = useQueryState('address');
   const { data, error, isLoading, tokenList, tokenMap } = useAlphaData();
   const [copied, setCopied] = useState(false);
+  const [alertDismissed, setAlertDismissed] = useState(true);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem('bscscan-alert-dismissed');
+    if (dismissed === 'true') {
+      setAlertDismissed(true);
+    } else {
+      setAlertDismissed(false);
+    }
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(address || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleAlertDismiss = () => {
+    setAlertDismissed(true);
+    localStorage.setItem('bscscan-alert-dismissed', 'true');
   };
 
   if (!address || !data && !isLoading) {
@@ -106,14 +121,33 @@ export default function AlphaTrackerProgress() {
           </div>
         </div>
 
-        {/* <Alert variant="destructive">
-          <Info className="h-4 w-4" />
-          <AlertTitle>Transaction Tracking Notice</AlertTitle>
-          <AlertDescription>
-            Currently, only BNB-based transactions are counted for volume calculation.
-            Stablecoin swaps (USDT, USDC, etc.) are not included in the tracking.
-          </AlertDescription>
-        </Alert> */}
+        {!alertDismissed && (
+          <Alert variant="warning" className="relative">
+            <Info className="h-4 w-4" />
+            <AlertTitle className="text-amber-800 dark:text-amber-200 font-semibold">BSCScan API is unstable</AlertTitle>
+            <AlertDescription className="text-amber-700 dark:text-amber-300 text-sm sm:text-base leading-relaxed">
+              <p>
+                We use BSCScan API to track your wallet transactions.
+                <br />
+                However, BSCScan is unstable and sometimes returns incorrect data.
+                <br />
+                This usually can be solved by refreshing the page.
+              </p>
+              <br />
+              <p>
+                If the problem persists, please contact us.
+              </p>
+            </AlertDescription>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-amber-200 dark:hover:bg-amber-800"
+              onClick={handleAlertDismiss}
+            >
+              <X className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+            </Button>
+          </Alert>
+        )}
 
         <div>
           {/* <div className="text-xl font-bold text-white dark:text-white">Stats</div> */}

@@ -44,7 +44,7 @@ export default function AlphaTrackerTabs() {
         </TabsList>
         {
           currentTab === "transactions" && (
-            <div className="flex items-center space-x-2 ml-auto">
+            <div className="flex items-center space-x-2">
               <Switch
                 id="show-all-transactions"
                 checked={showAllTransactions}
