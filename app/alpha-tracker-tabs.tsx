@@ -15,12 +15,23 @@ import AlphaTrackerTokenTable from "./alpha-tracker-token-table";
 import { useState } from "react";
 
 export default function AlphaTrackerTabs() {
-  const [currentTab, setCurrentTab] = useQueryState('tab', { defaultValue: "transactions" });
-  const [address] = useQueryState('address');
-  const [showAllTransactions, setShowAllTransactions] = useQueryState('showAllTransactions', { defaultValue: false });
+  const [currentTab, setCurrentTab] = useQueryState('tab', {
+    defaultValue: "transactions",
+    parse: (value: string) => value,
+    serialize: (value: string) => value
+  });
+  const [address] = useQueryState('address', {
+    parse: (value: string) => value,
+    serialize: (value: string) => value
+  });
+  const [showAllTransactions, setShowAllTransactions] = useQueryState('showAllTransactions', {
+    defaultValue: false,
+    parse: (value: string) => value === 'true',
+    serialize: (value: boolean) => value.toString()
+  });
   const { data, isLoading, tokenList, tokenMap } = useAlphaData();
 
-  if (!address || !data && !isLoading) {
+  if (!address || (!data && !isLoading)) {
     return null;
   }
 
