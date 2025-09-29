@@ -110,7 +110,7 @@ export function transformTransactions(
     }> = {};
 
     // Process normal transactions
-    normalTransactions.forEach(tx => {
+    (normalTransactions ?? []).forEach(tx => {
         if (!transactionGroups[tx.hash]) {
             transactionGroups[tx.hash] = { normal: [], internal: [], token: [] };
         }
@@ -118,7 +118,7 @@ export function transformTransactions(
     });
 
     // Process internal transactions
-    internalTransactions.forEach(tx => {
+    (internalTransactions ?? []).forEach(tx => {
         if (!transactionGroups[tx.hash]) {
             transactionGroups[tx.hash] = { normal: [], internal: [], token: [] };
         }
@@ -126,7 +126,7 @@ export function transformTransactions(
     });
 
     // Process token transactions
-    tokenTransactions.forEach(tx => {
+    (tokenTransactions ?? []).forEach(tx => {
         if (!transactionGroups[tx.hash]) {
             transactionGroups[tx.hash] = { normal: [], internal: [], token: [] };
         }
